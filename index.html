@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaleidoscope — Contract Intelligence</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --surface2: #f0efe9;
+      --border: #e0ddd6;
+      --border2: #ccc9c0;
+      --text: #1a1916;
+      --text2: #6b6860;
+      --text3: #9e9b93;
+      --accent: #0A2CE3;
+      --accent-bg: #e8edfb;
+      --accent-text: #071a8a;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container { max-width: 740px; margin: 0 auto; }
+
+    header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: -.02em;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .tagline {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.6;
+      font-family: 'Helvetica Neue', sans-serif;
+    }
+
+    .search-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    textarea {
+      flex: 1;
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      line-height: 1.6;
+      resize: none;
+      min-height: 52px;
+      max-height: 200px;
+      overflow-y: auto;
+      transition: border-color .15s;
+    }
+
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    .btn-ask {
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity .15s;
+      flex-shrink: 0;
+    }
+
+    .btn-ask:hover { opacity: .88; }
+    .btn-ask:disabled { opacity: .4; cursor: default; }
+
+    .suggestions {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .suggestion {
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 12px;
+      padding: 4px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+      color: var(--text2);
+      transition: all .15s;
+    }
+
+    .suggestion:hover {
+      background: var(--accent-bg);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+
+    .history { display: flex; flex-direction: column; gap: 12px; }
+
+    .exchange {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .q-block {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .a-block {
+      padding: 14px 16px;
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .a-block.loading {
+      color: var(--text3);
+      font-style: italic;
+    }
+
+    .a-block.error { color: #a03030; }
+
+    .sec-label {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+
+    .disclaimer {
+      font-family: 'Helvetica Neue', sans-serif;
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="eyebrow">Kaleidoscope — Internal Idea Generation Tool</div>
+      <h1>Contract Intelligence</h1>
+      <p class="tagline">Ask anything about our show deal terms. Reads live from the contracts database — no login needed.</p>
+    </header>
+
+    <div class="search-card">
+      <div class="input-row">
+        <textarea id="q" placeholder="Ask about any show's contract terms..." rows="2" onkeydown="handleKey(event)"></textarea>
+        <button class="btn-ask" id="askBtn" onclick="ask()">Ask</button>
+      </div>
+      <div class="suggestions">
+        <span class="suggestion" onclick="prefill('What are the exclusivity terms for No Such Thing?')">No Such Thing exclusivity</span>
+        <span class="suggestion" onclick="prefill('Which shows are distributed through iHeartMedia?')">iHeart shows</span>
+        <span class="suggestion" onclick="prefill('What are the termination terms for Part Time Genius?')">Part Time Genius termination</span>
+        <span class="suggestion" onclick="prefill('Which contracts are expiring soonest?')">Expiring contracts</span>
+        <span class="suggestion" onclick="prefill('Who are the signatories on the Enhanced Games contract?')">Enhanced Games signatories</span>
+        <span class="suggestion" onclick="prefill('What does the reversion clause mean for the Othram deal?')">Othram reversion clause</span>
+      </div>
+    </div>
+
+    <div id="history" class="history"></div>
+
+    <p class="disclaimer">This tool reads directly from the contracts database. Specific financial amounts are not surfaced. For legal questions, always consult the full contract document.</p>
+  </div>
+
+  <script>
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        ask();
+      }
+    }
+
+    function prefill(text) {
+      document.getElementById('q').value = text;
+      document.getElementById('q').focus();
+    }
+
+    async function ask() {
+      const q = document.getElementById('q').value.trim();
+      if (!q) return;
+
+      const btn = document.getElementById('askBtn');
+      const history = document.getElementById('history');
+
+      btn.disabled = true;
+      document.getElementById('q').value = '';
+
+      const exchange = document.createElement('div');
+      exchange.className = 'exchange';
+      exchange.innerHTML = `
+        <div class="q-block">${escHtml(q)}</div>
+        <div class="a-block loading" id="answer-pending">Looking up contract data...</div>`;
+      history.insertBefore(exchange, history.firstChild);
+
+      try {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q })
+        });
+        const data = await res.json();
+        const aBlock = exchange.querySelector('.a-block');
+        aBlock.classList.remove('loading');
+        if (data.error) {
+          aBlock.classList.add('error');
+          aBlock.textContent = 'Error: ' + data.error;
+        } else {
+          aBlock.textContent = data.answer;
+        }
+      } catch(e) {
+        const aBlock = exchange.querySelector('.a-block');
+        aBlock.classList.remove('loading');
+        aBlock.classList.add('error');
+        aBlock.textContent = 'Network error. Please try again.';
+      }
+
+      btn.disabled = false;
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>
