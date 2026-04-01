@@ -2,7 +2,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const googleEmail = process.env.GOOGLE_SERVICE_EMAIL;
   const googleKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
